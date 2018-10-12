@@ -92,7 +92,7 @@ func runSetup() {
 }
 
 func oidcSetup(config map[string]string) {
-	awsRole, _ := ui.Ask("AWS federation role:", &input.Options{
+	awsRole, _ := ui.Ask("AWS federation role (arn:aws:iam::<Account ID>:role/<Role Name>):", &input.Options{
 		Required: true,
 		Loop:     true,
 	})
@@ -105,7 +105,7 @@ func oidcSetup(config map[string]string) {
 }
 
 func saml2Setup(config map[string]string) {
-	answer, _ := ui.Ask(`Choose method of OIDC provider's SAML token exchange:
+	answer, _ := ui.Ask(`Select the subject token type to exchange for SAML2 assertion:
 	1. Access Token (urn:ietf:params:oauth:token-type:access_token)
 	2. ID Token (urn:ietf:params:oauth:token-type:id_token)
   `, &input.Options{

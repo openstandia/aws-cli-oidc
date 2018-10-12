@@ -114,6 +114,8 @@ func login(cmd *cobra.Command, args []string) {
 		Exit(err)
 	}
 
+	Writeln("")
+
 	Export("AWS_ACCESS_KEY_ID", awsCreds.AWSAccessKey)
 	Export("AWS_SECRET_ACCESS_KEY", awsCreds.AWSSecretKey)
 	Export("AWS_SESSION_TOKEN", awsCreds.AWSSessionToken)
@@ -266,37 +268,50 @@ func doLogin(client *OIDCClient) (*TokenResponse, error) {
 func launch(client *OIDCClient, url string, listener net.Listener) string {
 	c := make(chan string)
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		url := r.URL
+	http.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
+		url := req.URL
 		q := url.Query()
 		code := q.Get("code")
 
-		w.Header().Set("Content-Type", "text/html")
+		res.Header().Set("Content-Type", "text/html")
 
 		// Redirect to user-defined successful/failure page
 		successful := client.RedirectToSuccessfulPage()
 		if successful != nil && code != "" {
 			url := successful.Url()
-			w.Header().Set("Location", (&url).String())
-			w.WriteHeader(302)
+			res.Header().Set("Location", (&url).String())
+			res.WriteHeader(302)
 		}
 		failure := client.RedirectToFailurePage()
 		if failure != nil && code == "" {
 			url := failure.Url()
-			w.Header().Set("Location", (&url).String())
-			w.WriteHeader(302)
+			res.Header().Set("Location", (&url).String())
+			res.WriteHeader(302)
 		}
 
-		// Response auto-close html
-		w.Header().Set("Cache-Control", "no-store")
-		w.Header().Set("Pragma", "no-cache")
-		w.WriteHeader(200)
-		w.Write([]byte(`<!DOCTYPE html>
-<html>
-<body onload="open(location, '_self').close();">
+		// Response result page
+		message := "Login "
+		if code != "" {
+			message += "successful"
+		} else {
+			message += "failed"
+		}
+		res.Header().Set("Cache-Control", "no-store")
+		res.Header().Set("Pragma", "no-cache")
+		res.WriteHeader(200)
+		res.Write([]byte(fmt.Sprintf(`<!DOCTYPE html>
+<body>
+%s
 </body>
 </html>
-`))
+`, message)))
+
+		if f, ok := res.(http.Flusher); ok {
+			f.Flush()
+		}
+
+		time.Sleep(100 * time.Millisecond)
+
 		c <- code
 	})
 

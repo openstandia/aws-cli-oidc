@@ -78,8 +78,8 @@ func loginToStsUsingRole(role *saml2aws.AWSRole, samlResponse string) (*AWSCrede
 
 	svc := sts.New(sess)
 
-	Writeln("PrincipalARN: %s", role.PrincipalARN)
-	Writeln("RoleARN: %s", role.RoleARN)
+	Traceln("PrincipalARN: %s", role.PrincipalARN)
+	Traceln("RoleARN: %s", role.RoleARN)
 
 	params := &sts.AssumeRoleWithSAMLInput{
 		PrincipalArn:    aws.String(role.PrincipalARN), // Required
