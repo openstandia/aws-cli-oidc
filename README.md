@@ -41,8 +41,8 @@ Usage:
   aws-cli-oidc [command]
 
 Available Commands:
+  get-cred    Get AWS credentials and out to stdout
   help        Help about any command
-  login       Interactive login
   setup       Interactive setup of aws-cli-oidc
 
 Flags:
@@ -59,12 +59,12 @@ Use `aws-cli-oidc setup` command and follow the guide.
 
 ### Get AWS temporary credentials
 
-Use `aws-cli-oidc login <your oidc provider name>` command. It opens your browser.
+Use `aws-cli-oidc get-cred <your oidc provider name>` command. It opens your browser.
 Now you can see the login page which the OIDC provider offers. Then do login.
 If successful, AWS temporary credentials will be shown as below.
 
 ```
-aws-cli-oidc login myop
+aws-cli-oidc get-cred myop
 Using config file: /home/wadahiro/.aws-cli-oidc/config.yaml
 Login successful!
 Selected role: arn:aws:iam::123456789012:role/developer

@@ -15,11 +15,11 @@ import (
 	"golang.org/x/net/context"
 )
 
-var loginCmd = &cobra.Command{
-	Use:   "login <OIDC provider name>",
-	Short: "Interactive login",
-	Long:  `Interactive login to AWS using the OIDC provider.`,
-	Run:   login,
+var getCredCmd = &cobra.Command{
+	Use:   "get-cred <OIDC provider name>",
+	Short: "Get AWS credentials and out to stdout",
+	Long:  `Get AWS credentials and out to stdout through your OIDC provider authentication.`,
+	Run:   getCred,
 }
 
 type TokenResponse struct {
@@ -43,7 +43,7 @@ type AWSCredentials struct {
 }
 
 func init() {
-	rootCmd.AddCommand(loginCmd)
+	rootCmd.AddCommand(getCredCmd)
 }
 
 type LoginParams struct {
@@ -60,7 +60,7 @@ type param struct {
 	mask  bool
 }
 
-func login(cmd *cobra.Command, args []string) {
+func getCred(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
 		Writeln("The OIDC provider name is required")
 		Exit(nil)

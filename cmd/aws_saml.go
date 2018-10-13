@@ -88,7 +88,7 @@ func loginToStsUsingRole(role *saml2aws.AWSRole, samlResponse string) (*AWSCrede
 		DurationSeconds: aws.Int64(int64(900)),
 	}
 
-	Traceln("Requesting AWS credentials using SAML assertion")
+	Writeln("Requesting AWS credentials using SAML assertion")
 
 	resp, err := svc.AssumeRoleWithSAML(params)
 	if err != nil {
