@@ -80,6 +80,7 @@ func getCred(cmd *cobra.Command, args []string) {
 	}
 
 	Writeln("Login successful!")
+	Traceln("ID token: %s", tokenResponse.IDToken)
 
 	awsFedType := client.config.GetString(AWS_FEDERATION_TYPE)
 
@@ -232,15 +233,14 @@ func createSAMLResponse(client *OIDCClient, samlAssertion string) (string, error
 }
 
 func doLogin(client *OIDCClient) (*TokenResponse, error) {
-	listener, err := net.Listen("tcp", "localhost:")
+	listener, err := net.Listen("tcp", "127.0.0.1:")
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot start local http server to handle login redirect")
 	}
 	port := listener.Addr().(*net.TCPAddr).Port
 
-	// TODO: support PKCE
 	clientId := client.config.GetString(CLIENT_ID)
-	redirect := fmt.Sprintf("http://localhost:%d", port)
+	redirect := fmt.Sprintf("http://127.0.0.1:%d", port)
 	v, err := pkce.CreateCodeVerifierWithLength(pkce.MaxLength)
 	if err != nil {
 		return nil, errors.Wrap(err, "Cannot generate OAuth2 PKCE code_challenge")
@@ -333,7 +333,7 @@ func launch(client *OIDCClient, url string, listener net.Listener) string {
 }
 
 func GetFreePort() (int, error) {
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:0")
 	if err != nil {
 		return 0, err
 	}
