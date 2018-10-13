@@ -17,19 +17,23 @@ Before using this tool, you or the system administrator need to setup the follow
 
 Also depending on the federation method between AWS and the OIDC provider, requirements for the OIDC providers will change.
 
-## For SAML2
+### Federation method: SAML2
 - Of course, the OIDC provider must support not only OIDC but also SAML2 for federation between itself and AWS.
 - The OIDC provider must support [OAuth 2.0 Token Exchange](https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-15) for exchanging OAuth/OIDC token and SAML2 assertion. `aws-cli-oidc` gets access token/ID token from the OIDC provider first, then it needs to get SAML2 assertion from the provider which is required for getting AWS temporary credentials using AWS STS API.
 
-## For OIDC
+### Federation method: OIDC
 - The OIDC provider only needs to support OIDC. SAML2 and OAuth 2.0 Token Exchange are not necessary. Very simple.
 - However, the JWKS endpoint of the OIDC provider needs to export it to the Internet because AWS try to access the endpoint to obtain the public key and to verify the ID token which is issued by the provider.
 
 
 ## Tested OIDC Provider
 
-Currently I tested this tool using [Keycloak](https://keycloak.org) as the OIDC provider.
-Note: You can't use SAML2 without extension which supports exchanging from access token to SAML2 assertion because Keycloak supports [OAuth 2.0 Token Exchange](https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-15) partially and doesn't support SAML2 assertion yet.
+|  OIDC Provider  |  OIDC  | SAML2 |
+| ---- | ---- | ---- |
+|  [Google account](https://accounts.google.com/.well-known/openid-configuration)  |  OK  |  -  |
+|  [Keycloak](https://www.keycloak.org)  |  OK  |  OK (Note 1)  |
+
+* Note 1: You can't use SAML2 without extension which supports exchanging from access token to SAML2 assertion because Keycloak supports [OAuth 2.0 Token Exchange](https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-15) partially and doesn't support SAML2 assertion yet.
 
 
 ## Usage
