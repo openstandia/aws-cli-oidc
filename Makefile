@@ -21,15 +21,15 @@ clean:
 .PHONY: cross-build
 cross-build:
 	for os in darwin linux windows; do \
+	    [ $$os = "windows" ] && EXT=".exe"; \
 		for arch in amd64; do \
-			GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo $(LDFLAGS) -o dist/$$os-$$arch/$(NAME); \
+			GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo $(LDFLAGS) -o dist/$$os-$$arch/$(NAME)$$EXT; \
 		done; \
 	done
 
 .PHONY: deps
 deps:
-	GO111MODULE=on
-	go mod vendor
+	GO111MODULE=on go mod vendor
 
 .PHONY: dist
 dist:

@@ -5,9 +5,9 @@ import (
 
 	"github.com/pkg/errors"
 
+	input "github.com/natsukagami/go-input"
 	"github.com/openstandia/aws-cli-oidc/rest"
 	"github.com/spf13/viper"
-	input "github.com/tcnksm/go-input"
 )
 
 type RESTClient struct {

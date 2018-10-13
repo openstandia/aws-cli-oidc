@@ -21,7 +21,9 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/go-homedir v1.0.0
+	github.com/natsukagami/go-input v0.0.0-20180603034138-38bb793e9754
 	github.com/nirasan/go-oauth-pkce-code-verifier v0.0.0-20170819232839-0fbfe93532da
+	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
 	github.com/pkg/errors v0.8.0
 	github.com/sirupsen/logrus v1.1.1 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
@@ -29,7 +31,7 @@ require (
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.2.1
 	github.com/stretchr/objx v0.1.1 // indirect
-	github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8
+	github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8 // indirect
 	github.com/tidwall/gjson v1.1.3 // indirect
 	github.com/tidwall/match v0.0.0-20171002075945-1731857f09b1 // indirect
 	github.com/versent/saml2aws v2.9.1+incompatible

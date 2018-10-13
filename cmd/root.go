@@ -6,9 +6,9 @@ import (
 	"runtime"
 
 	homedir "github.com/mitchellh/go-homedir"
+	input "github.com/natsukagami/go-input"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	input "github.com/tcnksm/go-input"
 )
 
 var rootCmd = &cobra.Command{

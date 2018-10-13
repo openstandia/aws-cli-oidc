@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os/exec"
-	"runtime"
 	"time"
 
 	"github.com/beevik/etree"
 	pkce "github.com/nirasan/go-oauth-pkce-code-verifier"
+	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -326,25 +325,11 @@ func launch(client *OIDCClient, url string, listener net.Listener) string {
 	}()
 
 	var code string
-	if openBrowser(url) {
+	if err := browser.OpenURL(url); err == nil {
 		code = <-c
 	}
 
 	return code
-}
-
-func openBrowser(url string) bool {
-	var args []string
-	switch runtime.GOOS {
-	case "darwin":
-		args = []string{"open"}
-	case "windows":
-		args = []string{"cmd", "/c", "start"}
-	default:
-		args = []string{"xdg-open"}
-	}
-	cmd := exec.Command(args[0], append(args[1:], url)...)
-	return cmd.Start() == nil
 }
 
 func GetFreePort() (int, error) {

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	input "github.com/natsukagami/go-input"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	input "github.com/tcnksm/go-input"
 )
 
 var setupCmd = &cobra.Command{
