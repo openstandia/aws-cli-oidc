@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/beevik/etree"
@@ -248,13 +249,29 @@ func doLogin(client *OIDCClient) (*TokenResponse, error) {
 	challenge := v.CodeChallengeS256()
 	verifier := v.String()
 
-	url := client.Authorization().
+	authReq := client.Authorization().
 		QueryParam("response_type", "code").
 		QueryParam("client_id", clientId).
 		QueryParam("redirect_uri", redirect).
 		QueryParam("code_challenge", challenge).
 		QueryParam("code_challenge_method", "S256").
-		QueryParam("scope", "openid").Url()
+		QueryParam("scope", "openid")
+
+	additionalQuery := client.config.GetString(OIDC_AUTHENTICATION_REQUEST_ADDITIONAL_QUERY)
+	if additionalQuery != "" {
+		queries := strings.Split(additionalQuery, "&")
+		for _, q := range queries {
+			kv := strings.Split(q, "=")
+			if len(kv) == 1 {
+				authReq = authReq.QueryParam(kv[0], "")
+			} else if len(kv) == 2 {
+				authReq = authReq.QueryParam(kv[0], kv[1])
+			} else {
+				return nil, errors.Errorf("Invalid additional query: %s", q)
+			}
+		}
+	}
+	url := authReq.Url()
 
 	code := launch(client, url.String(), listener)
 	if code != "" {

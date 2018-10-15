@@ -34,6 +34,10 @@ func runSetup() {
 		Required: true,
 		Loop:     true,
 	})
+	additionalQuery, _ := ui.Ask("Additional query for OIDC authentication request (Default: none):", &input.Options{
+		Default:  "",
+		Required: false,
+	})
 	successfulRedirectURL, _ := ui.Ask("Successful redirect URL (Default: none):", &input.Options{
 		Default:  "",
 		Required: false,
@@ -64,6 +68,7 @@ func runSetup() {
 	config := map[string]string{}
 
 	config[OIDC_PROVIDER_METADATA_URL] = server
+	config[OIDC_AUTHENTICATION_REQUEST_ADDITIONAL_QUERY] = additionalQuery
 	config[SUCCESSFUL_REDIRECT_URL] = successfulRedirectURL
 	config[FAILURE_REDIRECT_URL] = failureRedirectURL
 	config[CLIENT_ID] = clientID

@@ -26,6 +26,7 @@ func Execute() {
 var configdir string
 
 const OIDC_PROVIDER_METADATA_URL = "oidc_provider_metadata_url"
+const OIDC_AUTHENTICATION_REQUEST_ADDITIONAL_QUERY = "oidc_authentication_request_additional_query"
 const SUCCESSFUL_REDIRECT_URL = "successful_redirect_url"
 const FAILURE_REDIRECT_URL = "failure_redirect_url"
 const CLIENT_ID = "client_id"
