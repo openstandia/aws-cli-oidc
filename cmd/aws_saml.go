@@ -101,7 +101,7 @@ func promptForAWSRoleSelection(awsRoles []*saml2aws.AWSRole) (*saml2aws.AWSRole,
 	})
 	i, _ := strconv.Atoi(answer)
 
-	return roles[roleOptions[i]], nil
+	return roles[roleOptions[i-1]], nil
 }
 
 func loginToStsUsingRole(role *saml2aws.AWSRole, samlResponse string) (*AWSCredentials, error) {
