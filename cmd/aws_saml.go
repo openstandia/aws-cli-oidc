@@ -2,10 +2,15 @@ package cmd
 
 import (
 	"encoding/base64"
+	"fmt"
+	"os"
+	"sort"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
+	input "github.com/natsukagami/go-input"
 	"github.com/pkg/errors"
 	"github.com/versent/saml2aws"
 )
@@ -48,22 +53,55 @@ func resolveRole(awsRoles []*saml2aws.AWSRole, samlAssertion string) (*saml2aws.
 		return nil, errors.New("No roles available")
 	}
 
-	awsAccounts, err := saml2aws.ParseAWSAccounts(samlAssertion)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse aws role accounts")
-	}
-
-	saml2aws.AssignPrincipals(awsRoles, awsAccounts)
+	Writeln("")
 
 	for {
-		role, err = saml2aws.PromptForAWSRoleSelection(awsAccounts)
+		var err error
+		role, err = promptForAWSRoleSelection(awsRoles)
 		if err == nil {
 			break
 		}
-		Writeln("Selecting role, try again")
+		Writeln("Selecting role, try again. Error: %v", err)
 	}
 
 	return role, nil
+}
+
+func promptForAWSRoleSelection(awsRoles []*saml2aws.AWSRole) (*saml2aws.AWSRole, error) {
+	roles := map[string]*saml2aws.AWSRole{}
+	var roleOptions []string
+
+	for _, role := range awsRoles {
+		name := fmt.Sprintf("%s", role.RoleARN)
+		roles[name] = role
+		roleOptions = append(roleOptions, name)
+	}
+
+	sort.Strings(roleOptions)
+	var showList string
+	for i, role := range roleOptions {
+		showList = showList + fmt.Sprintf("  %d. %s\n", i+1, role)
+	}
+
+	ui := &input.UI{
+		Writer: os.Stderr,
+		Reader: os.Stdin,
+	}
+
+	answer, _ := ui.Ask(fmt.Sprintf("Please choose the role [1-%d]:\n\n%s", len(awsRoles), showList), &input.Options{
+		Required: true,
+		Loop:     true,
+		ValidateFunc: func(s string) error {
+			i, err := strconv.Atoi(s)
+			if err != nil || i < 1 || i > len(awsRoles) {
+				return errors.New(fmt.Sprintf("Please choose the role [1-%d]", len(awsRoles)))
+			}
+			return nil
+		},
+	})
+	i, _ := strconv.Atoi(answer)
+
+	return roles[roleOptions[i]], nil
 }
 
 func loginToStsUsingRole(role *saml2aws.AWSRole, samlResponse string) (*AWSCredentials, error) {
