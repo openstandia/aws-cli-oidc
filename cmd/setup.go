@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	input "github.com/natsukagami/go-input"
 	"github.com/pkg/errors"
@@ -64,6 +66,35 @@ func runSetup() {
 			return nil
 		},
 	})
+	maxSessionDurationSeconds, _ := ui.Ask("The max session duration, in seconds, of the role session [900-43200] (Default: 3600):", &input.Options{
+		Default:  "3600",
+		Required: true,
+		Loop:     true,
+		ValidateFunc: func(s string) error {
+			i, err := strconv.ParseInt(s, 10, 64)
+			if err != nil || i < 900 || i > 43200 {
+				return errors.New(fmt.Sprintf("Input must be 900-43200"))
+			}
+			return nil
+		},
+	})
+	defaultIAMRoleArn, _ := ui.Ask("The default IAM Role ARN when you have multiple roles, as arn:aws:iam::<account-id>:role/<role-name> (Default: none):", &input.Options{
+		Default:  "",
+		Required: false,
+		Loop:     true,
+		ValidateFunc: func(s string) error {
+			if s == "" {
+				return nil
+			}
+			arn := strings.Split(s, ":")
+			if len(arn) == 6 {
+				if arn[0] == "arn" && arn[1] == "aws" && arn[2] == "iam" && arn[3] == "" && strings.HasPrefix(arn[5], "role/") {
+					return nil
+				}
+			}
+			return errors.New(fmt.Sprintf("Input must be IAM Role ARN"))
+		},
+	})
 
 	config := map[string]string{}
 
@@ -74,6 +105,8 @@ func runSetup() {
 	config[CLIENT_ID] = clientID
 	config[CLIENT_SECRET] = clientSecret
 	config[AWS_FEDERATION_TYPE] = answerFedType
+	config[MAX_SESSION_DURATION_SECONDS] = maxSessionDurationSeconds
+	config[DEFAULT_IAM_ROLE_ARN] = defaultIAMRoleArn
 
 	if answerFedType == AWS_FEDERATION_TYPE_OIDC {
 		oidcSetup(config)

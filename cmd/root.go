@@ -32,6 +32,8 @@ const FAILURE_REDIRECT_URL = "failure_redirect_url"
 const CLIENT_ID = "client_id"
 const CLIENT_SECRET = "client_secret"
 const AWS_FEDERATION_TYPE = "aws_federation_type"
+const MAX_SESSION_DURATION_SECONDS = "max_session_duration_seconds"
+const DEFAULT_IAM_ROLE_ARN = "default_iam_role_arn"
 
 // OIDC config
 const AWS_FEDERATION_ROLE = "aws_federation_role"
