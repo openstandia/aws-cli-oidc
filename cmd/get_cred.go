@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -84,6 +85,12 @@ func getCred(cmd *cobra.Command, args []string) {
 	Traceln("ID token: %s", tokenResponse.IDToken)
 
 	awsFedType := client.config.GetString(AWS_FEDERATION_TYPE)
+	maxSessionDurationSecondsString := client.config.GetString(MAX_SESSION_DURATION_SECONDS)
+	maxSessionDurationSeconds, err := strconv.ParseInt(maxSessionDurationSecondsString, 10, 64)
+	if err != nil {
+		maxSessionDurationSeconds = 3600
+	}
+	defaultIAMRoleArn := client.config.GetString(DEFAULT_IAM_ROLE_ARN)
 
 	var awsCreds *AWSCredentials
 	if awsFedType == AWS_FEDERATION_TYPE_OIDC {
@@ -105,7 +112,7 @@ func getCred(cmd *cobra.Command, args []string) {
 			Exit(err)
 		}
 
-		awsCreds, err = GetCredentialsWithSAML(samlResponse)
+		awsCreds, err = GetCredentialsWithSAML(samlResponse, maxSessionDurationSeconds, defaultIAMRoleArn)
 		if err != nil {
 			Writeln("Failed to get aws credentials with SAML2")
 			Exit(err)
