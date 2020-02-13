@@ -40,3 +40,5 @@ require (
 	gopkg.in/AlecAivazis/survey.v1 v1.6.2 // indirect
 	gopkg.in/ini.v1 v1.38.3 // indirect
 )
+
+go 1.13

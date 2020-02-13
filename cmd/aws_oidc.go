@@ -7,11 +7,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GetCredentialsWithOIDC(client *OIDCClient, idToken string) (*AWSCredentials, error) {
-	return loginToStsUsingIDToken(client, idToken)
+func GetCredentialsWithOIDC(client *OIDCClient, idToken string, durationSeconds int64) (*AWSCredentials, error) {
+	return loginToStsUsingIDToken(client, idToken, durationSeconds)
 }
 
-func loginToStsUsingIDToken(client *OIDCClient, idToken string) (*AWSCredentials, error) {
+func loginToStsUsingIDToken(client *OIDCClient, idToken string, durationSeconds int64) (*AWSCredentials, error) {
 	role := client.config.GetString(AWS_FEDERATION_ROLE)
 	roleSessionName := client.config.GetString(AWS_FEDERATION_ROLE_SESSION_NAME)
 
@@ -26,7 +26,7 @@ func loginToStsUsingIDToken(client *OIDCClient, idToken string) (*AWSCredentials
 		RoleArn:          &role,
 		RoleSessionName:  &roleSessionName,
 		WebIdentityToken: &idToken,
-		DurationSeconds:  aws.Int64(int64(900)),
+		DurationSeconds:  aws.Int64(durationSeconds),
 	}
 
 	Writeln("Requesting AWS credentials using ID Token")
