@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"net/url"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -69,8 +70,20 @@ func InitializeClient(name string) (*OIDCClient, error) {
 		runSetup()
 	}
 	providerURL := config.GetString(OIDC_PROVIDER_METADATA_URL)
+	insecure, err := strconv.ParseBool(config.GetString(INSECURE_SKIP_VERIFY))
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to parse insecure_skip_verify option in the config")
+	}
 
-	restClient := rest.New()
+	restClient, err := rest.New(&rest.RestClientConfig{
+		ClientCert:         config.GetString(CLIENT_AUTH_CERT),
+		ClientKey:          config.GetString(CLIENT_AUTH_KEY),
+		ClientCA:           config.GetString(CLIENT_AUTH_CA),
+		InsecureSkipVerify: insecure,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to initialize HTTP client for the OIDC provider")
+	}
 	base := restClient.Target(providerURL)
 	res, err := base.Request().Get()
 

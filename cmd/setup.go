@@ -56,6 +56,32 @@ func runSetup() {
 		Default:  "",
 		Required: false,
 	})
+	clientAuthCert, _ := ui.Ask("A PEM encoded certificate file which is required to access the OIDC provider with MTLS (Default: none):", &input.Options{
+		Default:  "",
+		Required: false,
+	})
+	var clientAuthKey string
+	var clientAuthCA string
+	if clientAuthCert != "" {
+		clientAuthKey, _ = ui.Ask("A PEM encoded private key file which is required to access the OIDC provider with MTLS (Default: none):", &input.Options{
+			Required: true,
+			Loop:     true,
+		})
+		clientAuthCA, _ = ui.Ask("A PEM encoded CA's certificate file which is required to access the OIDC provider with MTLS (Default: none):", &input.Options{
+			Required: true,
+			Loop:     true,
+		})
+	}
+	insecureSkipVerify, _ := ui.Ask("Insecure mode for HTTPS access (Default: false):", &input.Options{
+		Default:  "false",
+		Required: false,
+		ValidateFunc: func(s string) error {
+			if strings.ToLower(s) != "false" || strings.ToLower(s) != "true" {
+				return errors.New(fmt.Sprintf("Input must be true or false"))
+			}
+			return nil
+		},
+	})
 	answerFedType, _ := ui.Ask(fmt.Sprintf("Choose type of AWS federation [%s/%s]:", AWS_FEDERATION_TYPE_OIDC, AWS_FEDERATION_TYPE_SAML2), &input.Options{
 		Required: true,
 		Loop:     true,
@@ -104,6 +130,10 @@ func runSetup() {
 	config[FAILURE_REDIRECT_URL] = failureRedirectURL
 	config[CLIENT_ID] = clientID
 	config[CLIENT_SECRET] = clientSecret
+	config[CLIENT_AUTH_CERT] = clientAuthCert
+	config[CLIENT_AUTH_KEY] = clientAuthKey
+	config[CLIENT_AUTH_CA] = clientAuthCA
+	config[INSECURE_SKIP_VERIFY] = insecureSkipVerify
 	config[AWS_FEDERATION_TYPE] = answerFedType
 	config[MAX_SESSION_DURATION_SECONDS] = maxSessionDurationSeconds
 	config[DEFAULT_IAM_ROLE_ARN] = defaultIAMRoleArn
