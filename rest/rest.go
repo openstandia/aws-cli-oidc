@@ -66,7 +66,7 @@ func New(config *RestClientConfig) (*RestClient, error) {
 		}
 		caCertPool, err := x509.SystemCertPool()
 		if err != nil {
-			return nil, err
+			caCertPool = x509.NewCertPool()
 		}
 		caCertPool.AppendCertsFromPEM(caCert)
 
