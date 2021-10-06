@@ -1,5 +1,5 @@
 NAME := aws-cli-oidc
-VERSION := v0.5.1
+VERSION := v0.6.0
 REVISION := $(shell git rev-parse --short HEAD)
 
 SRCS    := $(shell find . -type f -name '*.go')
@@ -10,7 +10,7 @@ DIST_DIRS := find * -type d -exec
 .DEFAULT_GOAL := bin/$(NAME)
 
 bin/$(NAME): $(SRCS)
-	go build $(LDFLAGS) -o bin/$(NAME)
+	go build $(LDFLAGS) -o bin/$(NAME) cmd/aws-cli-oidc/*.go
 
 .PHONY: clean
 clean:

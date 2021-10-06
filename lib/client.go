@@ -1,18 +1,18 @@
-package cmd
+package lib
 
 import (
 	"net/url"
+	"os"
 	"strconv"
 
 	"github.com/pkg/errors"
 
 	input "github.com/natsukagami/go-input"
-	"github.com/openstandia/aws-cli-oidc/rest"
 	"github.com/spf13/viper"
 )
 
 type RESTClient struct {
-	client *rest.RestClient
+	client *RestClient
 }
 
 type OIDCMetadataResponse struct {
@@ -45,16 +45,25 @@ type OIDCMetadataResponse struct {
 }
 
 type OIDCClient struct {
-	restClient *rest.RestClient
-	base       *rest.WebTarget
+	restClient *RestClient
+	base       *WebTarget
 	config     *viper.Viper
 	metadata   *OIDCMetadataResponse
 }
 
-func InitializeClient(name string) (*OIDCClient, error) {
+func CheckInstalled(name string) (*OIDCClient, error) {
+	ui := &input.UI{
+		Writer: os.Stdout,
+		Reader: os.Stdin,
+	}
+
+	return InitializeClient(ui, name)
+}
+
+func InitializeClient(ui *input.UI, name string) (*OIDCClient, error) {
 	config := viper.Sub(name)
 	if config == nil {
-		answer, _ := ui.Ask("OIDC provider URL not set, do you want to install a config file? [Y/n]", &input.Options{
+		answer, _ := ui.Ask("OIDC provider URL is not set. Do you want to setup the configuration? [Y/n]", &input.Options{
 			Default: "Y",
 			Loop:    true,
 			ValidateFunc: func(s string) error {
@@ -67,7 +76,7 @@ func InitializeClient(name string) (*OIDCClient, error) {
 		if answer == "n" {
 			return nil, errors.New("Failed to initialize client because of no OIDC provider URL")
 		}
-		runSetup()
+		RunSetup(ui)
 	}
 	providerURL := config.GetString(OIDC_PROVIDER_METADATA_URL)
 	insecure, err := strconv.ParseBool(config.GetString(INSECURE_SKIP_VERIFY))
@@ -75,7 +84,7 @@ func InitializeClient(name string) (*OIDCClient, error) {
 		return nil, errors.Wrap(err, "Failed to parse insecure_skip_verify option in the config")
 	}
 
-	restClient, err := rest.New(&rest.RestClientConfig{
+	restClient, err := NewRestClient(&RestClientConfig{
 		ClientCert:         config.GetString(CLIENT_AUTH_CERT),
 		ClientKey:          config.GetString(CLIENT_AUTH_KEY),
 		ClientCA:           config.GetString(CLIENT_AUTH_CA),
@@ -128,15 +137,15 @@ func (c *OIDCClient) ClientForm() url.Values {
 	return form
 }
 
-func (c *OIDCClient) Authorization() *rest.WebTarget {
+func (c *OIDCClient) Authorization() *WebTarget {
 	return c.restClient.Target(c.metadata.AuthorizationEndpoint)
 }
 
-func (c *OIDCClient) Token() *rest.WebTarget {
+func (c *OIDCClient) Token() *WebTarget {
 	return c.restClient.Target(c.metadata.TokenEndpoint)
 }
 
-func (c *OIDCClient) RedirectToSuccessfulPage() *rest.WebTarget {
+func (c *OIDCClient) RedirectToSuccessfulPage() *WebTarget {
 	url := c.config.GetString(SUCCESSFUL_REDIRECT_URL)
 	if url == "" {
 		return nil
@@ -144,7 +153,7 @@ func (c *OIDCClient) RedirectToSuccessfulPage() *rest.WebTarget {
 	return c.restClient.Target(url)
 }
 
-func (c *OIDCClient) RedirectToFailurePage() *rest.WebTarget {
+func (c *OIDCClient) RedirectToFailurePage() *WebTarget {
 	url := c.config.GetString(FAILURE_REDIRECT_URL)
 	if url == "" {
 		return nil

@@ -41,6 +41,7 @@ require (
 	github.com/tidwall/match v1.1.0 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/versent/saml2aws v2.17.0+incompatible // indirect
+	github.com/zalando/go-keyring v0.1.1
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/net v0.0.0-20211005215030-d2e5035098b3 // indirect
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
@@ -50,4 +51,16 @@ require (
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
+
+require (
+	github.com/danieljoos/wincred v1.1.0 // indirect
+	github.com/godbus/dbus/v5 v5.0.4 // indirect
+	github.com/werf/lockgate v0.0.0-20211004100849-f85d5325b201
+)
+
+require (
+	github.com/gofrs/flock v0.7.1 // indirect
+	github.com/google/uuid v1.1.2 // indirect
+	github.com/spaolacci/murmur3 v1.1.0 // indirect
 )
