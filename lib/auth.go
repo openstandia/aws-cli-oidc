@@ -21,15 +21,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Authenticate(client *OIDCClient, roleArn string, maxSessionDurationSeconds int64, asJson bool) {
+func Authenticate(client *OIDCClient, roleArn string, maxSessionDurationSeconds int64, useSecret, asJson bool) {
 	// Resolve target IAM Role ARN
 	defaultIAMRoleArn := client.config.GetString(DEFAULT_IAM_ROLE_ARN)
 	if roleArn == "" {
 		roleArn = defaultIAMRoleArn
 	}
 
+	var awsCreds *AWSCredentials
+	var err error
+
 	// Try to reuse stored credential in secret
-	awsCreds, err := AWSCredential(roleArn)
+	if useSecret {
+		awsCreds, err = AWSCredential(roleArn)
+	}
 
 	if !isValid(awsCreds) || err != nil {
 		tokenResponse, err := doLogin(client)
@@ -81,8 +86,11 @@ func Authenticate(client *OIDCClient, roleArn string, maxSessionDurationSeconds 
 			Exit(err)
 		}
 
-		// Store into secret
-		SaveAWSCredential(roleArn, awsCreds)
+		if useSecret {
+			// Store into secret
+			SaveAWSCredential(roleArn, awsCreds)
+			Write("The AWS credentials has been saved in OS secret store")
+		}
 	}
 
 	if asJson {
@@ -110,7 +118,7 @@ func isValid(cred *AWSCredentials) bool {
 
 	sess, err := session.NewSession()
 	if err != nil {
-		Writeln("Failed to create session")
+		Writeln("Failed to create aws client session")
 		Exit(err)
 	}
 
@@ -127,7 +135,7 @@ func isValid(cred *AWSCredentials) bool {
 	_, err = svc.GetCallerIdentity(input)
 
 	if err != nil {
-		Writeln("The previous credential isn't valid: %v", err)
+		Writeln("The previous credential isn't valid")
 	}
 
 	return err == nil

@@ -14,8 +14,9 @@ var getCredCmd = &cobra.Command{
 
 func init() {
 	getCredCmd.Flags().StringP("provider", "p", "", "OIDC provider name")
-	getCredCmd.Flags().StringP("role", "r", "", "Override assume role ARN")
-	getCredCmd.Flags().Int64P("max-duration", "d", 0, "Override max session duration, in seconds, of the role session [900-43200]")
+	getCredCmd.Flags().StringP("role", "r", "", "Override default assume role ARN")
+	getCredCmd.Flags().Int64P("max-duration", "d", 0, "Override default max session duration, in seconds, of the role session [900-43200]")
+	getCredCmd.Flags().BoolP("use-secret", "s", false, "Store AWS credentials into OS secret store, then load it without re-authentication")
 	getCredCmd.Flags().BoolP("json", "j", false, "Print the credential as JSON format")
 	rootCmd.AddCommand(getCredCmd)
 }
@@ -29,6 +30,7 @@ func getCred(cmd *cobra.Command, args []string) {
 
 	roleArn, _ := cmd.Flags().GetString("role")
 	maxDurationSeconds, _ := cmd.Flags().GetInt64("max-duration")
+	useSecret, _ := cmd.Flags().GetBool("use-secret")
 	asJson, _ := cmd.Flags().GetBool("json")
 
 	client, err := lib.CheckInstalled(providerName)
@@ -37,5 +39,5 @@ func getCred(cmd *cobra.Command, args []string) {
 		lib.Exit(err)
 	}
 
-	lib.Authenticate(client, roleArn, maxDurationSeconds, asJson)
+	lib.Authenticate(client, roleArn, maxDurationSeconds, useSecret, asJson)
 }

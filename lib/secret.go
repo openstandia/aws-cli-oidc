@@ -123,7 +123,7 @@ func AWSCredential(roleArn string) (*AWSCredentials, error) {
 		return nil, fmt.Errorf("Not found the credential for %s", roleArn)
 	}
 
-	Writeln("Got credential from secret store for %s", roleArn)
+	Writeln("Got credential from OS secret store for %s", roleArn)
 
 	var cred AWSCredentials
 
@@ -144,6 +144,8 @@ func SaveAWSCredential(roleArn string, cred *AWSCredentials) {
 	}
 
 	Secret.Save(roleArn, string(jsonStr))
+
+	Write("The AWS credentials has been saved in OS secret store")
 }
 
 func Clear() error {
