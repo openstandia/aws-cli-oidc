@@ -1,4 +1,4 @@
-package rest
+package lib
 
 import (
 	"bytes"
@@ -46,7 +46,7 @@ type Response struct {
 	res *http.Response
 }
 
-func New(config *RestClientConfig) (*RestClient, error) {
+func NewRestClient(config *RestClientConfig) (*RestClient, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: config.InsecureSkipVerify,
 	}

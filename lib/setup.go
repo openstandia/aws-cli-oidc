@@ -1,4 +1,4 @@
-package cmd
+package lib
 
 import (
 	"fmt"
@@ -8,26 +8,17 @@ import (
 
 	input "github.com/natsukagami/go-input"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var setupCmd = &cobra.Command{
-	Use:   "setup",
-	Short: "Interactive setup of aws-cli-oidc",
-	Long:  `Interactive setup of aws-cli-oidc. Will prompt you for OIDC provider URL and other settings.`,
-	Run:   setup,
-}
+func RunSetup(ui *input.UI) {
+	if ui == nil {
+		ui = &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
+		}
+	}
 
-func init() {
-	rootCmd.AddCommand(setupCmd)
-}
-
-func setup(cmd *cobra.Command, args []string) {
-	runSetup()
-}
-
-func runSetup() {
 	providerName, _ := ui.Ask("OIDC provider name:", &input.Options{
 		Required: true,
 		Loop:     true,
@@ -139,9 +130,9 @@ func runSetup() {
 	config[DEFAULT_IAM_ROLE_ARN] = defaultIAMRoleArn
 
 	if answerFedType == AWS_FEDERATION_TYPE_OIDC {
-		oidcSetup(config)
+		oidcSetup(ui, config)
 	} else if answerFedType == AWS_FEDERATION_TYPE_SAML2 {
-		saml2Setup(config)
+		saml2Setup(ui, config)
 	}
 
 	viper.Set(providerName, config)
@@ -159,20 +150,15 @@ func runSetup() {
 	Writeln("Saved %s", configPath)
 }
 
-func oidcSetup(config map[string]string) {
-	awsRole, _ := ui.Ask("AWS federation role (arn:aws:iam::<Account ID>:role/<Role Name>):", &input.Options{
-		Required: true,
-		Loop:     true,
-	})
+func oidcSetup(ui *input.UI, config map[string]string) {
 	awsRoleSessionName, _ := ui.Ask("AWS federation roleSessionName:", &input.Options{
 		Required: true,
 		Loop:     true,
 	})
-	config[AWS_FEDERATION_ROLE] = awsRole
 	config[AWS_FEDERATION_ROLE_SESSION_NAME] = awsRoleSessionName
 }
 
-func saml2Setup(config map[string]string) {
+func saml2Setup(ui *input.UI, config map[string]string) {
 	answer, _ := ui.Ask(`Select the subject token type to exchange for SAML2 assertion:
 	1. Access Token (urn:ietf:params:oauth:token-type:access_token)
 	2. ID Token (urn:ietf:params:oauth:token-type:id_token)
