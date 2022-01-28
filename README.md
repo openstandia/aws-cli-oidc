@@ -46,6 +46,74 @@ Also depending on the federation type between AWS and the OIDC provider, require
 
 - Note 1: You need to use Keycloak 12 or higher that supports exchanging from access token to SAML2 assertion. Also, you need to enable Token Exchange feature.
 
+## Keycloak configuration
+
+### Before you start:
+- Have a [saml2 client](https://neuw.medium.com/aws-connect-saml-based-identity-provider-using-keycloak-9b3e6d0111e6) setup in your realm. Ensure you can login and switch to your accounts.
+- This setup was completed on keycloak 16.1.0
+- Ensure the keycloak server is started with the following flags:
+  - -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled
+  - -Dkeycloak.profile.feature.token_exchange=enabled
+  This enables the preview features of fine grained authorization and [token exchange](https://www.keycloak.org/docs/latest/securing_apps/index.html#internal-token-to-internal-token-exchange).
+
+### Setup an OpenID client
+```
+access_type                  = "CONFIDENTIAL"
+enabled                      = "true"
+standard_flow_enabled        = "true"
+type                         = "openid"
+valid_redirect_uris          = [
+  "http://localhost:*",
+  "http://127.0.0.1:*"
+]
+```
+
+### Setup Permissions for the Token Exchange
+As found on this link here: https://www.keycloak.org/docs/latest/securing_apps/index.html#_client_to_client_permission
+The Target is your previously setup and working saml2 client.
+When you add the client policy the client you add is your newly created OpenID client you created above.
+
+### Setup aws-cli-oidc
+aws:
+  aws_federation_type: saml2
+  client_auth_ca: ""
+  client_auth_cert: ""
+  client_auth_key: ""
+  client_id: "yournewlycreatedopenidclient"
+  client_secret: "theclientsecretfromtheaboveclient"
+  default_iam_role_arn: ""
+  failure_redirect_url: ""
+  insecure_skip_verify: "false"
+  max_session_duration_seconds: "3600"
+  oidc_authentication_request_additional_query: ""
+  oidc_provider_metadata_url: https://example.com/auth/realms/mysupercoolrealm/.well-known/openid-configuration
+  oidc_provider_token_exchange_audience: "yourtargetsalm2awsclient"
+  oidc_provider_token_exchange_subject_token_type: urn:ietf:params:oauth:token-type:access_token
+  successful_redirect_url: ""
+
+### Usage
+```
+$ aws-cli-oidc get-cred -p aws
+Using config file: ~/.aws-cli-oidc/config.yaml
+Login successful!
+
+Please choose the role [1-3]:
+
+  1. arn:aws:iam::xxxxx:role/dev-User
+  2. arn:aws:iam::yyyyy:role/staging-User
+  3. arn:aws:iam::zzzzz:role/prod-User
+
+Enter a value: 2
+
+Selected role: arn:aws:iam::yyyyy:role/staging-User
+Max Session Duration: 36000 seconds
+Requesting AWS credentials using SAML assertion
+
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_SESSION_TOKEN=...
+```
+
 ## Install
 
 Download from [Releases page](https://github.com/openstandia/aws-cli-oidc/releases).
